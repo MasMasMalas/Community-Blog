@@ -1,5 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\ArticleModerationController;
+use App\Http\Controllers\Admin\CategoryManagementController;
+use App\Http\Controllers\Admin\CommentModerationController;
+use App\Http\Controllers\Admin\TagManagementController;
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
 
 // ---------------------------------------------------------------------------
@@ -7,27 +22,29 @@ use Illuminate\Support\Facades\Route;
 // ---------------------------------------------------------------------------
 
 // Home / article feed
-Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])
+Route::get('/', [HomeController::class, 'index'])
     ->name('home');
 
 // Article detail (read-only)
-Route::get('/articles', [\App\Http\Controllers\ArticleController::class, 'index'])
+Route::get('/articles', [ArticleController::class, 'index'])
     ->name('articles.index');
-Route::get('/articles/{slug}', [\App\Http\Controllers\ArticleController::class, 'show'])
+Route::get('/articles/{slug}', [ArticleController::class, 'show'])
     ->name('articles.show');
 
 // Category listing & articles per category
-Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index'])
+Route::get('/categories', [CategoryController::class, 'index'])
     ->name('categories.index');
-Route::get('/categories/{slug}', [\App\Http\Controllers\CategoryController::class, 'show'])
+Route::get('/categories/{slug}', [CategoryController::class, 'show'])
     ->name('categories.show');
 
 // Tag — articles per tag
-Route::get('/tags/{slug}', [\App\Http\Controllers\TagController::class, 'show'])
+Route::get('/tags', [TagController::class, 'index'])
+    ->name('tags.index');
+Route::get('/tags/{slug}', [TagController::class, 'show'])
     ->name('tags.show');
 
 // Full-text search
-Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])
+Route::get('/search', [SearchController::class, 'index'])
     ->name('search');
 
 // ---------------------------------------------------------------------------
@@ -35,13 +52,13 @@ Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])
 // ---------------------------------------------------------------------------
 
 Route::middleware('guest')->group(function () {
-    Route::get('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'create'])
+    Route::get('/register', [RegisterController::class, 'create'])
         ->name('register');
-    Route::post('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'store']);
+    Route::post('/register', [RegisterController::class, 'store']);
 
-    Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showForm'])
+    Route::get('/login', [LoginController::class, 'showForm'])
         ->name('login');
-    Route::post('/login', [\App\Http\Controllers\Auth\LoginController::class, 'login']);
+    Route::post('/login', [LoginController::class, 'login']);
 });
 
 // ---------------------------------------------------------------------------
@@ -51,51 +68,55 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
 
     // Logout
-    Route::post('/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])
+    Route::post('/logout', [LoginController::class, 'logout'])
         ->name('logout');
 
     // User profile
-    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])
+    Route::get('/profile', [ProfileController::class, 'show'])
         ->name('profile.show');
-    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])
         ->name('profile.update');
-    Route::put('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])
+    Route::get('/profile/password', [ProfileController::class, 'changePassword'])
+        ->name('profile.password.form');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.password');
-    Route::post('/profile/avatar', [\App\Http\Controllers\ProfileController::class, 'uploadAvatar'])
+    Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar'])
         ->name('profile.avatar');
 
     // Dashboard — all authenticated users land here; controller redirects per role
-    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
+    Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
     // -----------------------------------------------------------------------
     // Author routes — authors and admins can create / manage articles
     // -----------------------------------------------------------------------
     Route::middleware('check.role:author,moderator,admin')->group(function () {
-        Route::get('/articles/create', [\App\Http\Controllers\ArticleController::class, 'create'])
+        Route::get('/articles/create', [ArticleController::class, 'create'])
             ->name('articles.create');
-        Route::post('/articles', [\App\Http\Controllers\ArticleController::class, 'store'])
+        Route::post('/articles', [ArticleController::class, 'store'])
             ->name('articles.store');
-        Route::get('/articles/{id}/edit', [\App\Http\Controllers\ArticleController::class, 'edit'])
+        Route::get('/articles/{id}/edit', [ArticleController::class, 'edit'])
             ->name('articles.edit');
-        Route::put('/articles/{id}', [\App\Http\Controllers\ArticleController::class, 'update'])
+        Route::put('/articles/{id}', [ArticleController::class, 'update'])
             ->name('articles.update');
-        Route::delete('/articles/{id}', [\App\Http\Controllers\ArticleController::class, 'destroy'])
+        Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])
             ->name('articles.destroy');
-        Route::post('/articles/{id}/submit', [\App\Http\Controllers\ArticleController::class, 'submit'])
+        Route::post('/articles/{id}/submit', [ArticleController::class, 'submit'])
             ->name('articles.submit');
 
         // Author's own article list
-        Route::get('/my-articles', [\App\Http\Controllers\ArticleController::class, 'myArticles'])
+        Route::get('/my-articles', [ArticleController::class, 'myArticles'])
             ->name('articles.mine');
     });
 
     // -----------------------------------------------------------------------
     // Comment routes — any authenticated user
     // -----------------------------------------------------------------------
-    Route::post('/articles/{slug}/comments', [\App\Http\Controllers\CommentController::class, 'store'])
+    Route::post('/articles/{slug}/comments', [CommentController::class, 'store'])
         ->name('comments.store');
-    Route::delete('/comments/{id}', [\App\Http\Controllers\CommentController::class, 'destroy'])
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy'])
         ->name('comments.destroy');
 
     // -----------------------------------------------------------------------
@@ -106,25 +127,25 @@ Route::middleware('auth')->group(function () {
         ->name('admin.')
         ->group(function () {
 
-            Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])
+            Route::get('/', [App\Http\Controllers\Admin\DashboardController::class, 'index'])
                 ->name('dashboard');
 
             // Article moderation queue
-            Route::get('/articles', [\App\Http\Controllers\Admin\ArticleModerationController::class, 'index'])
+            Route::get('/articles', [ArticleModerationController::class, 'index'])
                 ->name('articles.index');
-            Route::put('/articles/{id}/approve', [\App\Http\Controllers\Admin\ArticleModerationController::class, 'approve'])
+            Route::put('/articles/{id}/approve', [ArticleModerationController::class, 'approve'])
                 ->name('articles.approve');
-            Route::put('/articles/{id}/reject', [\App\Http\Controllers\Admin\ArticleModerationController::class, 'reject'])
+            Route::put('/articles/{id}/reject', [ArticleModerationController::class, 'reject'])
                 ->name('articles.reject');
-            Route::put('/articles/{id}/revision', [\App\Http\Controllers\Admin\ArticleModerationController::class, 'revision'])
+            Route::put('/articles/{id}/revision', [ArticleModerationController::class, 'revision'])
                 ->name('articles.revision');
 
             // Comment moderation queue
-            Route::get('/comments', [\App\Http\Controllers\Admin\CommentModerationController::class, 'index'])
+            Route::get('/comments', [CommentModerationController::class, 'index'])
                 ->name('comments.index');
-            Route::put('/comments/{id}/approve', [\App\Http\Controllers\Admin\CommentModerationController::class, 'approve'])
+            Route::put('/comments/{id}/approve', [CommentModerationController::class, 'approve'])
                 ->name('comments.approve');
-            Route::delete('/comments/{id}', [\App\Http\Controllers\Admin\CommentModerationController::class, 'destroy'])
+            Route::delete('/comments/{id}', [CommentModerationController::class, 'destroy'])
                 ->name('comments.destroy');
 
             // ---------------------------------------------------------------
@@ -133,21 +154,31 @@ Route::middleware('auth')->group(function () {
             Route::middleware('check.role:admin')->group(function () {
 
                 // Category management
-                Route::get('/categories', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'index'])
+                Route::get('/categories', [CategoryManagementController::class, 'index'])
                     ->name('categories.index');
-                Route::post('/categories', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'store'])
+                Route::post('/categories', [CategoryManagementController::class, 'store'])
                     ->name('categories.store');
-                Route::put('/categories/{id}', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'update'])
+                Route::put('/categories/{id}', [CategoryManagementController::class, 'update'])
                     ->name('categories.update');
-                Route::delete('/categories/{id}', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'destroy'])
+                Route::delete('/categories/{id}', [CategoryManagementController::class, 'destroy'])
                     ->name('categories.destroy');
 
+                // Tag management
+                Route::get('/tags', [TagManagementController::class, 'index'])
+                    ->name('tags.index');
+                Route::post('/tags', [TagManagementController::class, 'store'])
+                    ->name('tags.store');
+                Route::put('/tags/{id}', [TagManagementController::class, 'update'])
+                    ->name('tags.update');
+                Route::delete('/tags/{id}', [TagManagementController::class, 'destroy'])
+                    ->name('tags.destroy');
+
                 // User management
-                Route::get('/users', [\App\Http\Controllers\Admin\UserManagementController::class, 'index'])
+                Route::get('/users', [UserManagementController::class, 'index'])
                     ->name('users.index');
-                Route::put('/users/{id}/role', [\App\Http\Controllers\Admin\UserManagementController::class, 'updateRole'])
+                Route::put('/users/{id}/role', [UserManagementController::class, 'updateRole'])
                     ->name('users.role');
-                Route::put('/users/{id}/status', [\App\Http\Controllers\Admin\UserManagementController::class, 'updateStatus'])
+                Route::put('/users/{id}/status', [UserManagementController::class, 'updateStatus'])
                     ->name('users.status');
             });
         });

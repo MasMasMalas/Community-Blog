@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -27,12 +28,12 @@ class RegisterRequest extends FormRequest
      *   1.5  – password = konfirmasi
      *   1.6  – password min 8 karakter, 1 huruf besar, 1 huruf kecil, 1 angka
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name'     => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'username' => [
                 'required',
                 'string',
@@ -41,7 +42,7 @@ class RegisterRequest extends FormRequest
                 'regex:/^[a-zA-Z0-9_]+$/',
                 'unique:users,username',
             ],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => [
                 'required',
                 'string',
@@ -63,27 +64,27 @@ class RegisterRequest extends FormRequest
         return [
             // name
             'name.required' => 'Nama lengkap wajib diisi.',
-            'name.max'      => 'Nama lengkap tidak boleh melebihi 255 karakter.',
+            'name.max' => 'Nama lengkap tidak boleh melebihi 255 karakter.',
 
             // username
             'username.required' => 'Username wajib diisi.',
-            'username.min'      => 'Username minimal 3 karakter.',
-            'username.max'      => 'Username tidak boleh melebihi 20 karakter.',
-            'username.regex'    => 'Username hanya boleh mengandung huruf, angka, dan garis bawah (_).',
-            'username.unique'   => 'Username sudah digunakan. Silakan pilih username lain.',
+            'username.min' => 'Username minimal 3 karakter.',
+            'username.max' => 'Username tidak boleh melebihi 20 karakter.',
+            'username.regex' => 'Username hanya boleh mengandung huruf, angka, dan garis bawah (_).',
+            'username.unique' => 'Username sudah digunakan. Silakan pilih username lain.',
 
             // email
             'email.required' => 'Alamat email wajib diisi.',
-            'email.email'    => 'Format alamat email tidak valid.',
-            'email.max'      => 'Alamat email tidak boleh melebihi 255 karakter.',
-            'email.unique'   => 'Alamat email sudah terdaftar. Silakan gunakan email lain atau masuk.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'email.max' => 'Alamat email tidak boleh melebihi 255 karakter.',
+            'email.unique' => 'Alamat email sudah terdaftar. Silakan gunakan email lain atau masuk.',
 
             // password
-            'password.required'  => 'Kata sandi wajib diisi.',
+            'password.required' => 'Kata sandi wajib diisi.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak sesuai.',
-            'password.min'       => 'Kata sandi minimal 8 karakter.',
-            'password.mixed'     => 'Kata sandi harus mengandung huruf besar dan huruf kecil.',
-            'password.numbers'   => 'Kata sandi harus mengandung minimal satu angka.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.mixed' => 'Kata sandi harus mengandung huruf besar dan huruf kecil.',
+            'password.numbers' => 'Kata sandi harus mengandung minimal satu angka.',
         ];
     }
 }

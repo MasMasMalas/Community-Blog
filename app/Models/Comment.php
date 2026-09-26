@@ -15,6 +15,7 @@ class Comment extends Model
     // ─── Status constants ─────────────────────────────────────────────────────
 
     const PENDING = 'pending';
+
     const APPROVED = 'approved';
 
     // ─── Mass assignment ──────────────────────────────────────────────────────

@@ -23,10 +23,10 @@ class RegisterTest extends TestCase
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
-            'name'                  => 'Budi Santoso',
-            'username'              => 'budi_santoso',
-            'email'                 => 'budi@contoh.com',
-            'password'              => 'Password1',
+            'name' => 'Budi Santoso',
+            'username' => 'budi_santoso',
+            'email' => 'budi@contoh.com',
+            'password' => 'Password1',
             'password_confirmation' => 'Password1',
         ], $overrides);
     }
@@ -175,7 +175,7 @@ class RegisterTest extends TestCase
     public function test_password_without_uppercase_is_rejected(): void
     {
         $response = $this->post(route('register'), $this->validPayload([
-            'password'              => 'password1',
+            'password' => 'password1',
             'password_confirmation' => 'password1',
         ]));
 
@@ -185,7 +185,7 @@ class RegisterTest extends TestCase
     public function test_password_without_lowercase_is_rejected(): void
     {
         $response = $this->post(route('register'), $this->validPayload([
-            'password'              => 'PASSWORD1',
+            'password' => 'PASSWORD1',
             'password_confirmation' => 'PASSWORD1',
         ]));
 
@@ -195,7 +195,7 @@ class RegisterTest extends TestCase
     public function test_password_without_number_is_rejected(): void
     {
         $response = $this->post(route('register'), $this->validPayload([
-            'password'              => 'Passwordonly',
+            'password' => 'Passwordonly',
             'password_confirmation' => 'Passwordonly',
         ]));
 
@@ -205,7 +205,7 @@ class RegisterTest extends TestCase
     public function test_password_shorter_than_eight_chars_is_rejected(): void
     {
         $response = $this->post(route('register'), $this->validPayload([
-            'password'              => 'Pass1',
+            'password' => 'Pass1',
             'password_confirmation' => 'Pass1',
         ]));
 

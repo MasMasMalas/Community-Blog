@@ -24,10 +24,10 @@ class LoginTest extends TestCase
     private function makeUser(array $overrides = []): User
     {
         return User::factory()->create(array_merge([
-            'username'   => 'testuser',
-            'password'   => Hash::make('Password1'),
-            'role'       => 'author',
-            'is_active'  => true,
+            'username' => 'testuser',
+            'password' => Hash::make('Password1'),
+            'role' => 'author',
+            'is_active' => true,
         ], $overrides));
     }
 
@@ -54,7 +54,7 @@ class LoginTest extends TestCase
         $user = $this->makeUser();
 
         $response = $this->post(route('login'), [
-            'email'    => $user->email,
+            'email' => $user->email,
             'password' => 'Password1',
         ]);
 
@@ -71,7 +71,7 @@ class LoginTest extends TestCase
         $user = $this->makeUser();
 
         $response = $this->post(route('login'), [
-            'email'    => $user->email,
+            'email' => $user->email,
             'password' => 'WrongPassword!',
         ]);
 
@@ -83,7 +83,7 @@ class LoginTest extends TestCase
     public function test_nonexistent_email_returns_generic_error(): void
     {
         $response = $this->post(route('login'), [
-            'email'    => 'nobody@example.com',
+            'email' => 'nobody@example.com',
             'password' => 'Password1',
         ]);
 
@@ -101,7 +101,7 @@ class LoginTest extends TestCase
         RateLimiter::clear('nobody@rate-test.com|127.0.0.1');
 
         $payload = [
-            'email'    => 'nobody@rate-test.com',
+            'email' => 'nobody@rate-test.com',
             'password' => 'WrongPassword',
         ];
 
@@ -128,7 +128,7 @@ class LoginTest extends TestCase
         $user = $this->makeUser(['is_active' => false]);
 
         $response = $this->post(route('login'), [
-            'email'    => $user->email,
+            'email' => $user->email,
             'password' => 'Password1',
         ]);
 

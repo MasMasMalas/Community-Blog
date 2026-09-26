@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -50,9 +51,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            'is_active'         => 'boolean',
-            'role'              => 'string',
+            'password' => 'hashed',
+            'is_active' => 'boolean',
+            'role' => 'string',
         ];
     }
 
@@ -79,6 +80,22 @@ class User extends Authenticatable
     // -------------------------------------------------------------------------
     // Helper / Role Methods
     // -------------------------------------------------------------------------
+
+    /**
+     * Get the full URL to the user's avatar.
+     * Returns a default avatar URL if no avatar is set.
+     *
+     * Persyaratan: 18.1, 18.2, 18.6, 18.7
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            return Storage::disk('public')->url($this->avatar);
+        }
+
+        // Return a default placeholder avatar
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=random';
+    }
 
     /**
      * Determine whether the user is an admin.

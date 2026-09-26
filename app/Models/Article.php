@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Article extends Model
 {
@@ -15,10 +16,15 @@ class Article extends Model
 
     // Status constants
     const DRAFT = 'draft';
+
     const PENDING_REVIEW = 'pending_review';
+
     const PUBLISHED = 'published';
+
     const REVISION = 'revision';
+
     const REJECTED = 'rejected';
+
     const ARCHIVED = 'archived';
 
     /**
@@ -48,10 +54,10 @@ class Article extends Model
     protected function casts(): array
     {
         return [
-            'views'        => 'integer',
+            'views' => 'integer',
             'submitted_at' => 'datetime',
             'published_at' => 'datetime',
-            'status'       => 'string',
+            'status' => 'string',
         ];
     }
 
@@ -112,6 +118,23 @@ class Article extends Model
     }
 
     // =========================================================================
+    // Accessors
+    // =========================================================================
+
+    /**
+     * Get the full URL for the article thumbnail.
+     * Returns a placeholder if no thumbnail is set.
+     */
+    public function getThumbnailUrlAttribute(): string
+    {
+        if ($this->thumbnail) {
+            return Storage::disk('public')->url($this->thumbnail);
+        }
+
+        return 'https://via.placeholder.com/800x600?text=No+Thumbnail';
+    }
+
+    // =========================================================================
     // Helper Methods
     // =========================================================================
 
@@ -153,5 +176,34 @@ class Article extends Model
     public function isRejected(): bool
     {
         return $this->status === self::REJECTED;
+    }
+
+    /**
+     * Generate a unique slug from an article title.
+     * If the slug already exists, append a numeric suffix.
+     *
+     * Requirement 4.6, 4.7
+     *
+     * @param  ?int  $excludeId  The article ID to exclude from the uniqueness check (for updates)
+     */
+    public static function generateUniqueSlug(string $title, ?int $excludeId = null): string
+    {
+        $baseSlug = str($title)
+            ->lower()
+            ->slug();
+
+        $query = self::where('slug', 'like', $baseSlug.'%');
+
+        if ($excludeId !== null) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $count = $query->count();
+
+        if ($count === 0) {
+            return $baseSlug;
+        }
+
+        return $baseSlug.'-'.($count + 1);
     }
 }

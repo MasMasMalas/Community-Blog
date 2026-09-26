@@ -42,4 +42,33 @@ class Category extends Model
             },
         ]);
     }
+
+    // ─── Helper Methods ──────────────────────────────────────────────────────
+
+    /**
+     * Generate a unique slug from a category name.
+     * If the slug already exists, append a numeric suffix.
+     *
+     * @param  ?int  $excludeId  The category ID to exclude from the uniqueness check (for updates)
+     */
+    public static function generateUniqueSlug(string $name, ?int $excludeId = null): string
+    {
+        $baseSlug = str($name)
+            ->lower()
+            ->slug();
+
+        $query = self::where('slug', 'like', $baseSlug.'%');
+
+        if ($excludeId !== null) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $count = $query->count();
+
+        if ($count === 0) {
+            return $baseSlug;
+        }
+
+        return $baseSlug.'-'.($count + 1);
+    }
 }
